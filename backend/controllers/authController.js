@@ -198,3 +198,45 @@ exports.logout = catchAsync(async (req, res, next) => {
     message: "Logged out successfully."
   });
 });
+
+exports.forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  const otp = generateOTP();
+  const otpExpires = Date.now() + 300000;  // 5 minutes
+
+  user.resetPasswordOTP = otp;
+  user.resetPasswordOTPExpires = otpExpires;
+
+  await user.save({ validateBeforeSave: false });
+
+  const htmlTemplate = loadTemplate("otpTemplate.hbs", {
+    title: "Reset Password",
+    username: user.username,
+    otp,
+    message: "Your password reset otp is: ",
+  });
+
+  try {
+    await sendEmail({
+      eamil: user.email,
+      subject: "Password rest OTP (valid for 5 minutes)",
+      html: htmlTemplate,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Password reset otp is send to your email."
+    });
+  } catch (error) {
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordOTPExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new AppError("There was an error sending the email. Try again later!", 500));
+  }
+});
