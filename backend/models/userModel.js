@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema(
     },
     otp: {
       type: String,
-      dafault: null,
+      default: null,
     },
     otpExpires: {
       type: Date,
@@ -101,7 +101,7 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
   next();
-})
+});
 
 const User = mongoose.model("User", userSchema);
 
