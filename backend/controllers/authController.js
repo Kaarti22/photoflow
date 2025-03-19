@@ -97,7 +97,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 
 
-
 exports.verifyAccount = catchAsync(async (req, res, next) => {
   const { otp } = req.body;
   if (!otp) {
@@ -121,5 +120,4 @@ exports.verifyAccount = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   createSendToken(user, 200, res, "Email has been verified");
-
 });

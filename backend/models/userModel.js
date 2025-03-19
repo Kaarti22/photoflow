@@ -66,7 +66,7 @@ const userSchema = new mongoose.Schema(
         ref: "Post",
       },
     ],
-    isVarifed: {
+    isVerified: {
       type: Boolean,
       default: false,
     },
