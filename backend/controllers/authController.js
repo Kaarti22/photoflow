@@ -210,10 +210,16 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   const otp = generateOTP();
   const otpExpires = Date.now() + 300000;  // 5 minutes
 
+  console.log(`Generated OTP: ${otp} for email: ${email}`); // Debugging output
+
   user.resetPasswordOTP = otp;
   user.resetPasswordOTPExpires = otpExpires;
 
   await user.save({ validateBeforeSave: false });
+
+  console.log(
+    `Saved OTP in DB: ${user.resetPasswordOTP}, Expires: ${user.resetPasswordOTPExpires}`
+  ); // Debugging output
 
   const htmlTemplate = loadTemplate("otpTemplate.hbs", {
     title: "Reset Password",
@@ -224,8 +230,8 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 
   try {
     await sendEmail({
-      eamil: user.email,
-      subject: "Password rest OTP (valid for 5 minutes)",
+      email: user.email,
+      subject: "Password reset OTP (valid for 5 minutes)",
       html: htmlTemplate,
     });
 
@@ -239,4 +245,59 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     return next(new AppError("There was an error sending the email. Try again later!", 500));
   }
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const { email, otp, password, passwordConfirm } = req.body;
+  // console.log("🔍 Email received:", req.body.email);
+  // console.log("🔍 OTP received:", req.body.otp);
+  
+  const user = await User.findOne({
+    email: req.body.email,
+    resetPasswordOTP: req.body.otp,
+    resetPasswordOTPExpires: { $gt: Date.now() },
+  });
+
+  // console.log("User found:", user); // Debugging output
+
+  if (!user) {
+    return next(new AppError("No User found", 400));
+  }
+
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  user.resetPasswordOTP = undefined;
+  user.resetPasswordOTPExpires = undefined;
+
+  // if (password !== passwordConfirm) {
+  //   return next(new AppError("Passwords do not match", 400));
+  // }
+
+  await user.save();
+  createSendToken(user, 200, res, "Password reset successfully");
+});
+
+// loggedIn user can update password
+exports.changePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, newPasswordConfirm } = req.body;
+  const { email } = req.user;
+
+  const user = await User.findOne({ email }).select("+password");
+  
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  if (!(await user.correctPassword(currentPassword, user.password))) {
+    return next(new AppError("Incorrect current password", 400));
+  }
+  if (newPassword !== newPasswordConfirm) {
+    return next(new AppError("New Password and confirm password do not match", 400));
+  }
+
+  user.password = newPassword;
+  user.passwordConfirm = newPasswordConfirm;
+  
+  await user.save();
+  createSendToken(user, 200, res, "Password changed successfully");
 });
