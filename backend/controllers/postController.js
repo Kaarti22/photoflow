@@ -4,6 +4,7 @@ const sharp = require("sharp");
 const { uploadToCloudinary } = require("../utils/cloudinary");
 const Post = require("../models/postModel");
 const User = require("../models/userModel");
+const { post } = require("../routes/userRoutes");
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const { caption } = req.body;
@@ -59,4 +60,49 @@ exports.createPost = catchAsync(async (req, res, next) => {
         },
     });
 
+});
+
+exports.getAllPost = catchAsync(async (req, res, next) => {
+    const posts = await Post.find()
+        .populate({
+            path: "user",
+            select: "username profilePicture bio",
+        })
+        .populate({
+            path: "comments",
+            select: "text user",
+            populate: {
+                path: "user",
+                select: "username profilePicture",
+            },
+        }).sort({ createdAt: -1 });
+    
+    return res.status(200).json({
+        status: "success",
+        results: posts.length,
+        data: {
+            posts,
+        },
+    });
+});
+
+exports.getUserPosts = catchAsync(async (req, res, next) => {
+    const userId = req.params.id;
+
+    const posts = await Post.find({ user: userId }).populate({
+        path: "comments",
+        select: "text user",
+        populate: {
+            path: "user",
+            select: "username profilePicture",
+        },
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+        status: "success",
+        results: posts.length,
+        data: {
+            posts,
+        },
+    });
 });
