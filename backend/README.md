@@ -1,14 +1,49 @@
-# PhotoFlow API Documentation
+# PhotoFlow Backend API Documentation
 
-## Authentication Endpoints
+A social media platform backend API built with Node.js, Express, and MongoDB.
 
-### Signup
+## Data Flow Architecture
 
-`POST /api/v1/users/signup`
+```mermaid
+graph TD
+    Client[Client] -->|HTTP Request| API[API Layer]
+    API -->|Authentication| Auth[Auth Middleware]
+    Auth -->|Validate| Controller[Controllers]
+    Controller -->|CRUD| DB[(MongoDB)]
+    DB -->|Response| Controller
+    Controller -->|JSON| Client
+```
 
-Register a new user in the system.
+## File Structure
 
-#### Request Body
+```
+backend/
+├── controllers/
+│   ├── authController.js    # Authentication logic
+│   ├── errorController.js   # Error handling
+│   ├── postController.js    # Post operations
+│   └── userController.js    # User operations
+├── models/
+│   ├── userModel.js        # User schema
+│   ├── postModel.js        # Post schema
+│   └── commentModel.js     # Comment schema
+├── routes/
+│   ├── userRoutes.js      # User routes
+│   └── postRoutes.js      # Post routes
+└── middleware/
+    ├── isAuthenticated.js  # Auth middleware
+    └── multer.js          # File upload
+```
+
+## API Endpoints
+
+### Authentication Routes
+
+#### Sign Up
+
+- **URL**: `/api/v1/users/signup`
+- **Method**: `POST`
+- **Body**:
 
 ```json
 {
@@ -19,83 +54,29 @@ Register a new user in the system.
 }
 ```
 
-#### Response
+- **Response**: `200 OK`
+  - Returns user data and JWT token
 
-**Success Response (201 Created)**
+#### Verify Account
 
-```json
-{
-  "status": "success",
-  "token": "jwt_token_here",
-  "data": {
-    "user": {
-      "username": "string",
-      "email": "string",
-      "id": "string"
-    }
-  }
-}
-```
-
-**Error Response (400 Bad Request)**
+- **URL**: `/api/v1/users/verify`
+- **Method**: `POST`
+- **Auth**: Required
+- **Body**:
 
 ```json
 {
-  "status": "fail",
-  "message": "Error message here"
+  "otp": "string"
 }
 ```
 
-#### Required Fields
+- **Response**: `200 OK`
 
-| Field           | Type   | Description                     |
-| --------------- | ------ | ------------------------------- |
-| username        | string | User's full name                |
-| email           | string | Valid email address             |
-| password        | string | Password (minimum 8 characters) |
-| passwordConfirm | string | Must match password field       |
+#### Login
 
-#### Diagrams
-
-**Request Flow**
-
-```mermaid
-sequenceDiagram
-    User->>Server: POST /api/v1/users/signup
-    Server-->>User: 201 Created (Success Response)
-    Server-->>User: 400 Bad Request (Error Response)
-```
-
-**Response Flow**
-
-```mermaid
-sequenceDiagram
-    Server->>User: 201 Created
-    User->>Server: Access Token
-```
-
-**Detailed Request-Response Flow**
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Server
-    User->>Server: POST /api/v1/users/signup
-    activate Server
-    Server-->>User: 201 Created (Success Response)
-    deactivate Server
-    alt Error Response
-        Server-->>User: 400 Bad Request
-    end
-```
-
-### Login
-
-`POST /api/v1/users/login`
-
-Authenticate a user and return a JWT token.
-
-#### Request Body
+- **URL**: `/api/v1/users/login`
+- **Method**: `POST`
+- **Body**:
 
 ```json
 {
@@ -104,116 +85,125 @@ Authenticate a user and return a JWT token.
 }
 ```
 
-#### Response
+- **Response**: `200 OK`
+  - Returns user data and JWT token
 
-**Success Response (200 OK)**
+#### Logout
 
-```json
-{
-  "status": "success",
-  "token": "jwt_token_here",
-  "data": {
-    "user": {
-      "username": "string",
-      "email": "string",
-      "id": "string"
-    }
-  }
-}
-```
+- **URL**: `/api/v1/users/logout`
+- **Method**: `POST`
+- **Response**: `200 OK`
 
-**Error Response (401 Unauthorized)**
+### User Routes
 
-```json
-{
-  "status": "fail",
-  "message": "Incorrect email or password"
-}
-```
+#### Get Profile
 
-#### Required Fields
+- **URL**: `/api/v1/users/profile/:id`
+- **Method**: `GET`
+- **Response**: `200 OK`
+  - Returns user profile data
 
-| Field    | Type   | Description         |
-| -------- | ------ | ------------------- |
-| email    | string | Valid email address |
-| password | string | User's password     |
+#### Edit Profile
 
-#### Diagrams
+- **URL**: `/api/v1/users/edit-profile`
+- **Method**: `POST`
+- **Auth**: Required
+- **Body**: `multipart/form-data`
+  - `bio`: string
+  - `profilePicture`: file
+- **Response**: `200 OK`
 
-**Request Flow**
+#### Follow/Unfollow User
 
-```mermaid
-sequenceDiagram
-    User->>Server: POST /api/v1/users/login
-    Server-->>User: 200 OK (Success Response)
-    Server-->>User: 401 Unauthorized (Error Response)
-```
+- **URL**: `/api/v1/users/follow-unfollow/:id`
+- **Method**: `POST`
+- **Auth**: Required
+- **Response**: `200 OK`
 
-**Response Flow**
+### Post Routes
 
-```mermaid
-sequenceDiagram
-    Server->>User: 200 OK
-    User->>Server: Access Token
-```
+#### Create Post
 
-**Detailed Request-Response Flow**
+- **URL**: `/api/v1/posts/create-post`
+- **Method**: `POST`
+- **Auth**: Required
+- **Body**: `multipart/form-data`
+  - `caption`: string
+  - `image`: file
+- **Response**: `200 OK`
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Server
-    User->>Server: POST /api/v1/users/login
-    activate Server
-    Server-->>User: 200 OK (Success Response)
-    deactivate Server
-    alt Error Response
-        Server-->>User: 401 Unauthorized
-    end
-```
+#### Get All Posts
 
-### Logout
+- **URL**: `/api/v1/posts/all`
+- **Method**: `GET`
+- **Response**: `200 OK`
+  - Returns array of posts
 
-`POST /api/v1/users/logout`
+#### Like/Dislike Post
 
-Log out the authenticated user.
+- **URL**: `/api/v1/posts/like-dislike/:id`
+- **Method**: `POST`
+- **Auth**: Required
+- **Response**: `200 OK`
 
-#### Response
+#### Add Comment
 
-**Success Response (200 OK)**
+- **URL**: `/api/v1/posts/comment/:id`
+- **Method**: `POST`
+- **Auth**: Required
+- **Body**:
 
 ```json
 {
-  "status": "success",
-  "message": "Logged out successfully."
+  "text": "string"
 }
 ```
 
-#### Diagrams
+- **Response**: `201 Created`
 
-**Request Flow**
+## Error Responses
 
-```mermaid
-sequenceDiagram
-    User->>Server: POST /api/v1/users/logout
-    Server-->>User: 200 OK (Success Response)
+All endpoints may return the following error responses:
+
+- `400 Bad Request`: Invalid input data
+- `401 Unauthorized`: Missing or invalid authentication
+- `403 Forbidden`: Insufficient permissions
+- `404 Not Found`: Resource not found
+- `500 Server Error`: Internal server error
+
+## Authentication
+
+The API uses JWT (JSON Web Tokens) for authentication. Include the token in:
+
+- Cookie: `token`
+- or Authorization header: `Bearer <token>`
+
+## File Upload
+
+Image uploads are handled using Multer and stored in Cloudinary. Supported formats:
+
+- JPEG/JPG
+- PNG
+- GIF
+
+## Rate Limiting
+
+API requests are limited to protect the server from abuse:
+
+- 100 requests per IP per 15 minutes
+- Applies to all endpoints
+
+## Environment Variables
+
+Required environment variables:
+
 ```
-
-**Response Flow**
-
-```mermaid
-sequenceDiagram
-    Server->>User: 200 OK
-```
-
-**Detailed Request-Response Flow**
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Server
-    User->>Server: POST /api/v1/users/logout
-    activate Server
-    Server-->>User: 200 OK (Success Response)
-    deactivate Server
+PORT=3000
+DB=mongodb://connection-string
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=90d
+JWT_COOKIE_EXPIRES_IN=90
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
