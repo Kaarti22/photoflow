@@ -12,8 +12,8 @@ const commentSchema = new mongoose.Schema({
         required: true,
     },
     createdAt: {
-        type: Data,
-        default: Data.now,
+        type: Date,
+        default: Date.now,
     },
 },
     { timestamps: true }

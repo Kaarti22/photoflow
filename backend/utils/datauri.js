@@ -1,13 +1,14 @@
-const DataUriParser = require('datauri/parser');
-
-const path = require('path');
+const DataUriParser = require("datauri/parser");
+const path = require("path");
 
 const getDataUri = (file) => {
-    const parser = new DataUriParser();
+  const parser = new DataUriParser();
+  const extName = path.extname(file.originalname).toString();
 
-    const extName = path.extname(file.originalname).toString();
-
-    return parser.format(extName, file.buffer).content;
-}
+  if (!file || !file.buffer) {
+    throw new Error("Invalid file input");
+  }
+  return parser.format(extName, file.buffer).content;
+};
 
 module.exports = getDataUri;

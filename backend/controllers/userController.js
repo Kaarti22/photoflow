@@ -74,7 +74,7 @@ exports.suggestedUser = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       users,
-    }.users,
+    }
   });
 });
 
@@ -83,7 +83,7 @@ exports.followUnfollow = catchAsync(async (req, res, next) => {
   const targetUserId = req.params.id;
 
   if (loginUserId.toString() === targetUserId) {
-    return next(new AppError("Your cananot follow unfollow yourself", 400));
+    return next(new AppError("Your cananot follow/unfollow yourself", 400));
   }
   const targetUser = await User.findById(targetUserId);
   if (!targetUser) {
@@ -99,12 +99,12 @@ exports.followUnfollow = catchAsync(async (req, res, next) => {
         { $pull: { following: targetUserId } }
       ),
       User.updateOne(
-        { _id: targetUser },
+        { _id: targetUserId },
         { $pull: { followers: loginUserId } }
       ),
     ]);
   } else {
-    await Promise.all(
+    await Promise.all([
       User.updateOne(
         { _id: loginUserId },
         { $addToSet: { following: targetUserId } }
@@ -113,7 +113,7 @@ exports.followUnfollow = catchAsync(async (req, res, next) => {
             { _id: targetUserId },
             {$addToSet: {followers: loginUserId}}
         ),
-    );
+    ]);
     }
     
     const updatedLoggedInUser = await User.findById(loginUserId).select(

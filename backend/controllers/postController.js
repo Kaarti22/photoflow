@@ -5,6 +5,7 @@ const { uploadToCloudinary, cloudinary } = require("../utils/cloudinary");
 const Post = require("../models/postModel");
 const User = require("../models/userModel");
 const { post } = require("../routes/userRoutes");
+const Comment = require("../models/commentModel");
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const { caption } = req.body;
@@ -43,7 +44,7 @@ exports.createPost = catchAsync(async (req, res, next) => {
 
   if (user) {
     user.posts.push(post.id);
-    await user.save({ validataBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
   }
 
   post = await post.populate({
@@ -142,7 +143,7 @@ exports.saveOrUnsavePost = catchAsync(async (req, res, next) => {
 
 exports.deletePost = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const usrId = req.user._id;
+  const userId = req.user._id;
 
   const post = await Post.findById(id).populate("user");
 
@@ -156,10 +157,10 @@ exports.deletePost = catchAsync(async (req, res, next) => {
     );
   }
   // remove the post from the user posts
-  await User.updateOne({ _id: userId }, { $pull: { posts: is } });
+  await User.updateOne({ _id: userId }, { $pull: { posts: id } });
 
   // remove this post posts from the users save list
-  await User.updateMany({ savedPosts: id }, { $pull: { savedPost: id } });
+  await User.updateMany({ savedPosts: id }, { $pull: { savedPosts: id } });
 
   // remove the comment of this post
   await Comment.deleteMany({ post: id });
@@ -207,7 +208,7 @@ exports.likeOrDislikePost = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.addComment = catchAsync(async (res, res, next) => {
+exports.addComment = catchAsync(async (req, res, next) => {
     const { id: postId } = req.params;
     const userId = req.user._id;
     
