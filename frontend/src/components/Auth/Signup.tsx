@@ -1,9 +1,13 @@
 "use client";
 import Image from "next/image";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 import PasswordInput from "./PasswordInput";
 import LoadingButton from "../Helper/LoadingButton";
 import Link from "next/link";
+import { BASE_API_URL } from "../../../server";
+import axios from "axios";
+import { handleAuthRequest } from "../utils/apiRequest";
+import { toast } from "sonner";
 
 interface FormData {
   username: string;
@@ -22,6 +26,7 @@ const Signup = () => {
     passwordConfirm: "",
   });
 
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }))
@@ -30,7 +35,15 @@ const Signup = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     // create our request body
-  }
+    const signupReq = async () => await axios.post(`${BASE_API_URL}/users/signup`, formData, { withCredentials: true });
+    
+    const result = await handleAuthRequest(signupReq, setIsLoading);
+
+    if (result) {
+      console.log(result.data.data.user);
+      toast.success(result.data.message);
+    }
+  };````````````````````
   
   return (
     <div className="w-full h-screen overflow-hidden">
