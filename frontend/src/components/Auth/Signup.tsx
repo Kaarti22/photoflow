@@ -27,6 +27,11 @@ const Signup = () => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   };
 
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    // create our request body
+  }
+  
   return (
     <div className="w-full h-screen overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-8">
@@ -54,7 +59,7 @@ const Signup = () => {
             /> */}
             <span className="text-rose-500"> Photoflow</span>
           </h1>
-          <form className="block w-[90%] sm:w-[80%] md:w-[60%] lg:w-[90%] xl:w-[80%] ">
+          <form onSubmit={handleSubmit} className="block w-[90%] sm:w-[80%] md:w-[60%] lg:w-[90%] xl:w-[80%] ">
             <div className="mb-4">
               <label htmlFor="name" className="font-semibold mb-2 block">
                 Username
@@ -95,7 +100,7 @@ const Signup = () => {
             <div className="mb-4">
               <PasswordInput
                 label="Password Confirm"
-                name="Confirm password"
+                name="passwordConfirm" // Change from "Confirm password"
                 placeholder="Confirm password"
                 value={formData.passwordConfirm}
                 onChange={handleChange}
