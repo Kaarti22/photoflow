@@ -4,12 +4,12 @@ import React, { ChangeEvent, FormEvent, useState } from "react";
 import PasswordInput from "./PasswordInput";
 import LoadingButton from "../Helper/LoadingButton";
 import Link from "next/link";
-import { BASE_API_URL } from "../../../server";
+import { BASE_API_URL } from "../../server";
 import axios from "axios";
 import { handleAuthRequest } from "../utils/apiRequest";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
-import { setAuthUser } from "../../../store/authSlice";
+import { setAuthUser } from "../../store/authSlice";
 import { useRouter } from "next/navigation";
 
 interface FormData {
@@ -48,9 +48,6 @@ const Signup = () => {
       dispatch(setAuthUser(result.data.data.user));
       toast.success(result.data.message);
       router.push("/");
-      // TODO
-      //1. redirect to Homepage
-      //2. add our user to redux store
 
     }
   };
