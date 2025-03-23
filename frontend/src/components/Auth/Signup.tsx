@@ -8,6 +8,9 @@ import { BASE_API_URL } from "../../../server";
 import axios from "axios";
 import { handleAuthRequest } from "../utils/apiRequest";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { setAuthUser } from "../../../store/authSlice";
+import { useRouter } from "next/navigation";
 
 interface FormData {
   username: string;
@@ -18,6 +21,8 @@ interface FormData {
 
 
 const Signup = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -40,10 +45,15 @@ const Signup = () => {
     const result = await handleAuthRequest(signupReq, setIsLoading);
 
     if (result) {
-      console.log(result.data.data.user);
+      dispatch(setAuthUser(result.data.data.user));
       toast.success(result.data.message);
+      router.push("/");
+      // TODO
+      //1. redirect to Homepage
+      //2. add our user to redux store
+
     }
-  };````````````````````
+  };
   
   return (
     <div className="w-full h-screen overflow-hidden">

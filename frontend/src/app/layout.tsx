@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sooner";
+import ClientProvider from "../../HOC/ClientProvider";
 
 const font = Roboto({
   weight: ['100', '300', '400', '500', '700', '900'],
@@ -20,11 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${font.className} antialiased`}
-      >
-        {children}
-        <Toaster/>
+      <body className={`${font.className} antialiased`}>
+        <ClientProvider>
+          {children}
+          <Toaster />
+        </ClientProvider>
       </body>
     </html>
   );
