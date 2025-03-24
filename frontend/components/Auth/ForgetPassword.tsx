@@ -6,10 +6,13 @@ import { BASE_API_URL } from "@/server";
 import axios from "axios";
 import { handleAuthRequest } from "../utils/apiRequest";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
 
 const ForgetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [email, setEmail] = useState("");
+    const [email, setEmail] = useState("");
+    const router = useRouter();
 
   const handleSubmit = async () => {
     const forgetPassReq = async () =>
@@ -20,9 +23,8 @@ const ForgetPassword = () => {
       );
     const result = await handleAuthRequest(forgetPassReq, setIsLoading);
 
-    if (result) {
-      console.log(result.data.message);
-
+      if (result) {
+        router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`)
       toast.success(result.data.message);
     }
   };

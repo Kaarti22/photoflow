@@ -50,9 +50,9 @@ const PasswordInput = ({
           className={`absolute outline-none right-3 top-3 p-0 ${iconClassName}`}
         >
           {showPassword ? (
-            <EyeOff className="h-5 w-5" />
-          ) : (
             <Eye className="h-5 w-5" />
+          ) : (
+            <EyeOff className="h-5 w-5" />
           )}
         </button>
       </div>
