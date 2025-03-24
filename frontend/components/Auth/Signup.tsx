@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { setAuthUser } from "../../store/authSlice";
 import { useRouter } from "next/navigation";
 
+
 interface FormData {
   username: string;
   email: string;

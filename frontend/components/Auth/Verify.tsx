@@ -1,21 +1,42 @@
 "use client";
-import { MailCheck } from "lucide-react";
-import React, { ChangeEvent, KeyboardEvent, useRef, useState } from "react";
+import { Dice1, Loader, MailCheck } from "lucide-react";
+import React, {
+  ChangeEvent,
+  KeyboardEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import LoadingButton from "../Helper/LoadingButton";
 import { BASE_API_URL } from "@/server";
 import axios from "axios";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { handleAuthRequest } from "../utils/apiRequest";
 import { setAuthUser } from "@/store/authSlice";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { RootState } from "@/store/store";
 
 const Verify = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const user = useSelector((state: RootState) => state?.auth.user);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/auth/login");
+    }
+    else if (user && user.isVerified) {
+      router.replace("/");
+    } 
+    else {
+      setIsPageLoading(false);
+    }
+  }, [user, router]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -56,7 +77,7 @@ const Verify = () => {
         { otp: otpValue },
         { withCredentials: true }
       );
-    
+
     const result = await handleAuthRequest(verifyReq, setIsLoading);
 
     if (result) {
@@ -67,27 +88,36 @@ const Verify = () => {
   };
 
   const handleResendOtp = async () => {
-    const resendOtpReq = async () => 
+    const resendOtpReq = async () =>
       await axios.post(`${BASE_API_URL}/users/resend-otp`, null, {
         withCredentials: true,
       });
-    
+
     const result = await handleAuthRequest(resendOtpReq, setIsLoading);
 
     if (result) {
       toast.success(result.data.message);
     }
+  };
+
+  if (isPageLoading) {
+    return (
+      <div className="h-screeen flex justify-center items-center">
+        <Loader className="w-20 h-20 animate-spin " />
+      </div>
+    );
   }
+
 
   return (
     <div className="h-screen flex items-center flex-col justify-center">
       <MailCheck className="w-20 h-20 sm:w-32 sm:h-32 text-red-600 md-12" />
       <h1 className="text-2xl sm:text-3xl font-bold mb-3">OTP Verification</h1>
       <p className="mb-6 text-sm sm:text-base text-gray-600 font-medium">
-        We have sent a code to garima@gmail.com
+        We have sent a code to {user?.email}
       </p>
       <div className="flex space-x-4">
-        {[0,1, 2, 3, 4, 5].map((index) => {
+        {[0, 1, 2, 3, 4, 5].map((index) => {
           return (
             <input
               type="number"
@@ -99,7 +129,7 @@ const Verify = () => {
                 inputRefs.current[index] = el;
               }}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              onChange={(e) => handleChange(index,e)}
+              onChange={(e) => handleChange(index, e)}
             />
           );
         })}
@@ -108,12 +138,20 @@ const Verify = () => {
         <h1 className="text-sm sm:text-lg font-medium text-gray-700">
           Didn`t recieved the OTP code ?{" "}
         </h1>
-        <button onClick={handleResendOtp} className="text-sm sm:text-lg font-medium text-blue-900 underline">
+        <button
+          onClick={handleResendOtp}
+          className="text-sm sm:text-lg font-medium text-blue-900 underline"
+        >
           Resend Code
         </button>
       </div>
 
-      <LoadingButton onClick={handleSubmit} isLoading={isLoading} size={"lg"} className="mt-6 w-52">
+      <LoadingButton
+        onClick={handleSubmit}
+        isLoading={isLoading}
+        size={"lg"}
+        className="mt-6 w-52"
+      >
         Verify
       </LoadingButton>
     </div>
