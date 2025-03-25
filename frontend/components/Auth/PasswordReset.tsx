@@ -46,7 +46,7 @@ const PasswordReset = () => {
     const result = await handleAuthRequest(resetPassReq, setIsLoading);
 
     if (result) {
-      // dispatch(setAuthUser(result.data.data.user));
+      dispatch(setAuthUser(result.data.data.user));
       toast.success(result.data.message);
       router.push("/auth/login");
     }
