@@ -31,7 +31,7 @@ const Home = () => {
         </div>
         <Feed />
       </div>
-      <div className="w-[30%] pt-8 px-6 lg:block hidden ">
+      <div className="w-[30%] pt-8 px-8 lg:block hidden ">
         <RightSidebar />
       </div>
     </div>
