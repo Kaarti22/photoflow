@@ -5,12 +5,14 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { handleAuthRequest } from "../utils/apiRequest";
 import axios from "axios";
-import { setPost } from "@/store/postSlice";
+import { likeOrDislike, setPost } from "@/store/postSlice";
 import { Bookmark, HeartIcon, Loader, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import DotButton from "../Helper/DotButton";
 import Image from "next/image";
 import Comment from "../Helper/Comment";
+import { toast } from "sonner";
+import { setAuthUser } from "@/store/authSlice";
 
 const Feed = () => {
   const dispatch = useDispatch();
@@ -34,9 +36,51 @@ const Feed = () => {
     getAllPost();
   }, [dispatch]);
 
-  const handleLikeDislike = async (is: string) => {};
+  const handleLikeDislike = async (id: string) => {
+    const result = await axios.post(
+      `${BASE_API_URL}/posts/like-dislike/${id}`,
+      {},
+      { withCredentials: true }
+    );
 
-  const handleSaveUnsave = async (id: string) => {};
+    if (result.data.status == "success") {
+      if (user?._id) {
+        dispatch(likeOrDislike({ postId: id, userId: user?._id }));
+        toast(result.data.message);
+      }
+    }
+  };
+
+  // const handleSaveUnsave = async (id: string) => {
+  //   const result = await axios.post(
+  //     `${BASE_API_URL}/posts/save-unsave-post/${id}`,
+  //     {},
+  //     { withCredentials: true }
+  //   );
+
+  //   if (result.data.success == "success") {
+  //     dispatch(setAuthUser(result.data.data.user));
+  //     toast.success(result.data.message);
+  //   }
+  //   console.log("SAVE", )
+  // };
+  const handleSaveUnsave = async (id: string) => {
+    try {
+      const result = await axios.post(
+        `${BASE_API_URL}/posts/save-unsave-post/${id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (result.data.status === "success") {
+        dispatch(setAuthUser(result.data.data.user));
+        toast.success(result.data.message);
+      }
+    } catch (error) {
+      toast.error("Failed to save/unsave post");
+      console.error(error);
+    }
+  };
 
   const handleComment = async (id: string) => {};
 
@@ -90,11 +134,27 @@ const Feed = () => {
             </div>
             <div className="mt-3 flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <HeartIcon className="cursor-pointer" />
+                <HeartIcon
+                  onClick={() => handleLikeDislike(post?._id)}
+                  className={`cursor-pointer ${
+                    user?._id && post.likes.includes(user?._id)
+                      ? "text-red-500"
+                      : ""
+                  }`}
+                />
                 <MessageCircle className="cursor-pointer" />
-                <Send className= "cursor-pointer" />
+                <Send className="cursor-pointer" />
               </div>
-              <Bookmark className="cursor-pointer" />
+              <Bookmark
+                onClick={() => {
+                  handleSaveUnsave(post._id);
+                }}
+                className={`cursor-pointer ${(
+                  user?.savedPosts as string[]
+                )?.some((savePostId: string) =>
+                  savePostId === post._id) ? "text-red-500" : ""
+                }`}
+              />
             </div>
             <h1 className="mt-2 text-sm font-semibold">
               {post.likes.length} likes

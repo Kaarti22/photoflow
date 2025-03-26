@@ -120,7 +120,7 @@ exports.saveOrUnsavePost = catchAsync(async (req, res, next) => {
   const isPostSave = user.savedPosts.includes(postId);
   if (isPostSave) {
     user.savedPosts.pull(postId);
-    await user.save({ validataBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
     return res.status(200).json({
       status: "success",
       message: "post unsaved successfully.",
