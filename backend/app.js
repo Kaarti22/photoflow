@@ -36,7 +36,7 @@ app.use("/api/v1/users", userRouter);
 // localhost:8000/api/v1/users/signup
 
 // routes for posts
-app.use("api/v1/posts", postRouter);
+app.use("/api/v1/posts", postRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
