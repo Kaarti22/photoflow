@@ -64,14 +64,14 @@ const Comment = ({ post, user }: Props) => {
                       className="flex mb-4 gap-3 items-center"
                     >
                       <Avatar>
-                        <AvatarImage src={item.user.profilePicture} />
+                        <AvatarImage src={item?.user?.profilePicture} />
                         <AvatarFallback>ME</AvatarFallback>
                       </Avatar>
                       <div className="flex items-center space-x-2">
                         <p className="text-sm font-bold">
-                          {item.user.username}
+                          {item?.user?.username}
                         </p>
-                        <p className="font-normal text-sm">{item.text}</p>
+                        <p className="font-normal text-sm">{item?.text}</p>
                       </div>
                     </div>
                   );
