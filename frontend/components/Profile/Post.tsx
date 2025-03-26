@@ -20,7 +20,7 @@ const Post = ({ userProfile }: Props) => {
               height={300}
               className="w-full h-full object-cover aspect-square"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-60 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-50 transition-opacity duration-300">
               <div className="flex space-x-6 ">
                 <button className="p-2 rounded-full text-white space-x-2 flex items-center font-bold">
                   <Heart className="w-7 h-7" />
