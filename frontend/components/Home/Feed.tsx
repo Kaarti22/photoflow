@@ -76,7 +76,7 @@ const Feed = () => {
                 <h1>{post.user?.username}</h1>
               </div>
               {/* DotButton */}
-              <DotButton />
+              <DotButton post={post} user={user} />
             </div>
             {/* Image */}
             <div className="mt-2">
@@ -92,7 +92,7 @@ const Feed = () => {
               <div className="flex items-center space-x-4">
                 <HeartIcon className="cursor-pointer" />
                 <MessageCircle className="cursor-pointer" />
-                <Send classNamecursor-pointer />
+                <Send className= "cursor-pointer" />
               </div>
               <Bookmark className="cursor-pointer" />
             </div>
@@ -101,7 +101,7 @@ const Feed = () => {
             </h1>
             <p className="mt-2 font-medium">{post.caption}</p>
             {/* Comments */}
-            <Comment />
+            <Comment post={post} user={user} />
             <div className="mt-2 flex items-center">
               <input
                 type="text"
