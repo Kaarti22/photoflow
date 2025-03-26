@@ -22,12 +22,14 @@ import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import Post from "./Post";
 import Save from "./Save";
+import { useFollowUnfollow } from "../hooks/use-auth";
 
 type Props = {
   id: string;
 };
 
 const Profile = ({ id }: Props) => {
+  const { handleFollowUnfollow } = useFollowUnfollow();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
   const [postOrSave, setPostOrSave] = useState<string>("POST");
@@ -103,7 +105,12 @@ const Profile = ({ id }: Props) => {
                   </Link>
                 )}
                 {!isOwnProfile && (
-                  <Button variant={isFollowing ? "destructive" : "secondary"}>
+                  <Button
+                    onClick={() => {
+                      handleFollowUnfollow(id);
+                    }}
+                    variant={isFollowing ? "destructive" : "secondary"}
+                  >
                     {isFollowing ? "Unfollow" : "Follow"}
                   </Button>
                 )}

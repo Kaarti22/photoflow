@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { handleAuthRequest } from "../utils/apiRequest";
 import axios from "axios";
-import { likeOrDislike, setPost } from "@/store/postSlice";
+import { addComment, likeOrDislike, setPost } from "@/store/postSlice";
 import { Bookmark, HeartIcon, Loader, MessageCircle, Send } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import DotButton from "../Helper/DotButton";
@@ -82,7 +82,18 @@ const Feed = () => {
     }
   };
 
-  const handleComment = async (id: string) => {};
+  const handleComment = async (id: string) => {
+    if (!comment) return;
+    const addCommentReq = async () => await axios.post(`${BASE_API_URL}/posts/comment/${id}`, { text: comment }, { withCredentials: true });
+    
+    const result = await handleAuthRequest(addCommentReq);
+
+    if (result?.data.status == "success") {
+      dispatch(addComment({ postId: id, comment: result?.data.data.comment }));
+      toast.success("Comment Posted");
+      setComment("");
+    }
+  };
 
   // handle loading state
   if (isLoading) {
@@ -162,7 +173,7 @@ const Feed = () => {
             <p className="mt-2 font-medium">{post.caption}</p>
             {/* Comments */}
             <Comment post={post} user={user} />
-            <div className="mt-2 flex items-center">
+            <div className="mt-3 flex items-center">
               <input
                 type="text"
                 placeholder="Add a Comment...."
@@ -176,7 +187,7 @@ const Feed = () => {
                 onClick={() => {
                   handleComment(post._id);
                 }}
-              ></p>
+              >Post</p>
             </div>
             <div className="pb-6 border-b-2"></div>
           </div>
