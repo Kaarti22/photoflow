@@ -6,7 +6,7 @@ import RightSidebar from './RightSidebar';
 import { Loader, MenuIcon } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '../ui/sheet';
 import Feed from './Feed';
-import { redirect, useRouter } from 'next/navigation';
+import { redirect} from 'next/navigation';
 import { RootState } from '@/store/store';
 import { BASE_API_URL } from '@/server';
 import axios from 'axios';

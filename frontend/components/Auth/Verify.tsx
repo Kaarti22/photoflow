@@ -1,5 +1,5 @@
 "use client";
-import { Dice1, Loader, MailCheck } from "lucide-react";
+import { Loader, MailCheck } from "lucide-react";
 import React, {
   ChangeEvent,
   KeyboardEvent,
