@@ -54,7 +54,7 @@ const Login = () => {
         {/* Banner */}
         <div className="lg:col-span-4 h-screen hidden lg:block">
           <Image
-            src="/signUpImg.jpg"
+            src="/signUp.jpg"
             alt=""
             width={1000}
             height={1000}
