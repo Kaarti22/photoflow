@@ -1,10 +1,10 @@
 "use client";
 import {
-  Heart,
+  // Heart,
   HomeIcon,
   LogOutIcon,
-  MessageCircle,
-  Search,
+  // MessageCircle,
+  // Search,
   SquarePlus,
 } from "lucide-react";
 import React, { useState } from "react";
@@ -51,18 +51,18 @@ const LeftSidebar = () => {
         icon: <HomeIcon />,
         label: "Home",
       },
-      {
-        icon: <Search />,
-        label: "Search",
-      },
-      {
-        icon: <MessageCircle />,
-        label: "Message",
-      },
-      {
-        icon: <Heart />,
-        label: "Notification",
-      },
+      // {
+      //   icon: <Search />,
+      //   label: "Search",
+      // },
+      // {
+      //   icon: <MessageCircle />,
+      //   label: "Message",
+      // },
+      // {
+      //   icon: <Heart />,
+      //   label: "Notification",
+      // },
       {
         icon: <SquarePlus />,
         label: "Create",
