@@ -6,6 +6,8 @@ const Post = require("../models/postModel");
 const User = require("../models/userModel");
 const { post } = require("../routes/userRoutes");
 const Comment = require("../models/commentModel");
+const axios = require("axios");
+require("dotenv").config();
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const { caption } = req.body;
@@ -51,6 +53,28 @@ exports.createPost = catchAsync(async (req, res, next) => {
     path: "user",
     select: "username email bio profilePicture",
   });
+
+  try {
+    const response = await axios.post(
+      `${process.env.CARETAKER_SERVER_URL}/api/receive-post`,
+      {
+        userHandle: post.user.username,
+        content: caption,
+        postId: post._id,
+        timestamp: post.createdAt,
+        imageUrl: post.image.url,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.CARETAKER_API_KEY}`,
+        },
+      }
+    );
+
+    console.log("Caretaker backend notified: ", response.status);
+  } catch (err) {
+    console.error("Error notifying caretaker backend: ", err.message);
+  }
 
   return res.status(200).json({
     status: "Success",
@@ -193,48 +217,56 @@ exports.likeOrDislikePost = catchAsync(async (req, res, next) => {
       id,
       { $pull: { likes: userId } },
       { new: true }
-      );
-      
-      return res.status(200).json({
-          status: "success",
-          message: "Post disliked successfully"
-      });
+    );
+
+    return res.status(200).json({
+      status: "success",
+      message: "Post disliked successfully",
+    });
   } else {
-      await Post.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true });
-      return res.status(200).json({
-          status: "success",
-          message: "Post liked successfully",
-      });
+    await Post.findByIdAndUpdate(
+      id,
+      { $addToSet: { likes: userId } },
+      { new: true }
+    );
+    return res.status(200).json({
+      status: "success",
+      message: "Post liked successfully",
+    });
   }
 });
 
 exports.addComment = catchAsync(async (req, res, next) => {
-    const { id: postId } = req.params;
-    const userId = req.user._id;
-    
-    const { text } = req.body;
+  const { id: postId } = req.params;
+  const userId = req.user._id;
 
-    const post = await Post.findById(postId);
+  const { text } = req.body;
 
-    if (!post) return next(new AppError("Post not found", 404));
+  const post = await Post.findById(postId);
 
-    if (!text) return next(new AppError("Comment text is required", 400));
+  if (!post) return next(new AppError("Post not found", 404));
 
-    const comment = await Comment.create({
-        text, user: userId, createdAt: Date.now(),
-    });
+  if (!text) return next(new AppError("Comment text is required", 400));
 
-    post.comments.push(comment);
-    await post.save({ validateBeforeSave: false });
+  const comment = await Comment.create({
+    text,
+    user: userId,
+    createdAt: Date.now(),
+  });
 
-    await comment.populate({ path: "user", select: "username profilePicture bio", });
+  post.comments.push(comment);
+  await post.save({ validateBeforeSave: false });
 
-    res.status(201).json({
-        status: "success",
-        message: "Comment added successfully",
-        data: {
-            comment,
-        },
-    })
+  await comment.populate({
+    path: "user",
+    select: "username profilePicture bio",
+  });
 
+  res.status(201).json({
+    status: "success",
+    message: "Comment added successfully",
+    data: {
+      comment,
+    },
+  });
 });
